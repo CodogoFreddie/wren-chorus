@@ -1,3 +1,5 @@
+import "wren-tree/main" for Node
+
 class Command {
 	callable { _callable }
 	description { _description }

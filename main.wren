@@ -1,5 +1,5 @@
 import "os" for Process
-import "wren-tree/main" for Node, Tree
+import "wren-tree/main" for Node
 
 import "./command" for Command
 import "./flag" for Flag

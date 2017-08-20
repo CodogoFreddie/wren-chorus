@@ -66,7 +66,7 @@ class Flag {
 		var longFlagMatcher = "--" + name
 		var shortFlagMatcher = shortName ? ("-" + shortName) : null
 
-		var value = defaultValue
+		var value = defaultValue || (type == Bool ? false : null)
 		for(i in 0...allRawFlags.count){
 			if(allRawFlags[i] == longFlagMatcher || allRawFlags[i] == shortFlagMatcher){
 				if(type == Bool){
