@@ -1,23 +1,53 @@
 import "os" for Process
-import "wren-deleggate/main" for Dispatcher, DispatchPolices
 import "wren-tree/main" for Node, Tree
 
 import "./flag" for Flag
 
+class Command {
+	name { _name }
+	description { _description }
+	label { "[%(name)]: %(description)" }
+
+	description=(val) { _description = val }
+	callable=(val) { _callable = val }
+
+	[subPath] { _subCommands[subPath] }
+	[subPath]=(subcommand) { _subCommands[subPath] = subcommand }
+
+	toString { "%(treeify)" }
+
+	treeify { 
+		var childNodes = []
+		for(c in _subCommands.keys){
+			childNodes.add( _subCommands[c].treeify )
+		}
+
+		return Node.new(
+			label,
+			childNodes
+		)
+	}
+
+	construct new(name, description, flags, callable){
+		_name = name
+		_description = description
+		_flags = flags 
+		_callable = callable
+		_subCommands = {}
+	}
+
+	addFlag(flag){
+		_flags.add(flag)
+	}
+}
+
 class Chorus {
 	construct new(name){
-		_commandDispatcher = Dispatcher.root(name)
-		_commandDispatcher.flags = DispatchPolices.callOne
-
-		_flagParser = Dispatcher.root()
-		_flagParser = DispatchPolices.callShallower
+		_hierarchy = Command.new(name, "", [], null)
 	}
 
-	addCommand(pathString, callable){ 
-		addCommand(pathString, "No Description Given", callable)
-	}
-	addCommand(pathString, description, callable){
-		//chunk pathString
+	findCommandAtPath(pathString){
+		//split pathString:
 		var pathList = []
 		var buffer = ""
 		for(c in pathString){
@@ -30,28 +60,52 @@ class Chorus {
 		}
 		pathList.add(buffer)
 
-		_commandDispatcher.addListener(pathList, callable)
-		
-		pathList.add("help")
-		_commandDispatcher.addListener(pathList) {
-			System.print("
-Help for [%(pathList.join(" "))]
-%(description)
-")
+		var writeHead = _hierarchy
+		for(command in pathList){
+			if(!writeHead[command]){
+				writeHead[command] = Command.new(command, "No Description", [], null)
+			}
+
+			writeHead = writeHead[command]
 		}
+
+		return writeHead
 	}
+
+	addCommand(pathString, callable){
+		var command = findCommandAtPath(pathString)
+		command.callable = callable
+	}
+
+	addDescription(pathString, description){
+		var command = findCommandAtPath(pathString)
+		command.description = description
+	}
+
+	addFlag(pathString, flag){
+	}
+
+	addFlag(pathString, name, type){
+		addFlag(pathString, Flag.new(name, type) )
+	}
+
+	addFlag(pathString, name, type, description){
+		addFlag(pathString, Flag.new( name, type, description) )
+	}
+
+	addFlag(pathString, name, type, description, shortName){
+		addFlag(pathString, Flag.new(name, type, description, shortName) )
+	}
+
 
 	run(){ run(Process.arguments) }
 
 	run(args){
-		if(args.count == 0){
-			return System.print("
-Command Structure:
-==================
-%(_commandDispatcher)
-")
-		}
+		System.print("%(_hierarchy)")
 
+		if(args.count == 0){
+			return System.print("PRINT COMMANDS INFO")
+		}
 		var path = args
 		var rawFlags = []
 
@@ -63,7 +117,6 @@ Command Structure:
 			}
 		}
 
-		System.print("%(path) : %(rawFlags)")
-		_commandDispatcher.dispatch(path, "DEFAULT INPUT")
+		path = path.join(" ")
 	}
 }
