@@ -42,6 +42,6 @@ chorus.addCommand("run") { |flags| System.print("[prints info about the run comm
 chorus.addFlag("", "verbose", Bool, "Run program with verbose debugging", "v")
 
 
-/*chorus.run([])*/
+chorus.run([])
 chorus.run()
-/*chorus.run(["package", "publish", "help"])*/
+chorus.run(["package", "publish", "help"])

@@ -4,9 +4,10 @@ import "wren-tree/main" for Node, Tree
 import "./flag" for Flag
 
 class Command {
-	name { _name }
 	description { _description }
-	label { "[%(name)]: %(description)" }
+	flags { _flags }
+	label { "\u001b[1m%(name)\u001b[0m: %(description)" }
+	name { _name }
 
 	description=(val) { _description = val }
 	callable=(val) { _callable = val }
@@ -21,7 +22,6 @@ class Command {
 		for(c in _subCommands.keys){
 			childNodes.add( _subCommands[c].treeify )
 		}
-
 		return Node.new(
 			label,
 			childNodes
@@ -83,6 +83,8 @@ class Chorus {
 	}
 
 	addFlag(pathString, flag){
+		var command = findCommandAtPath(pathString)
+		command.addFlag(flag)
 	}
 
 	addFlag(pathString, name, type){
@@ -106,6 +108,7 @@ class Chorus {
 		if(args.count == 0){
 			return System.print("PRINT COMMANDS INFO")
 		}
+
 		var path = args
 		var rawFlags = []
 
