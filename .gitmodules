@@ -1,0 +1,6 @@
+[submodule "wren-tree"]
+	path = wren-tree
+	url = git@github.com:CodogoFreddie/wren-tree.git
+[submodule "wren-deleggate"]
+	path = wren-deleggate
+	url = git@github.com:CodogoFreddie/wren-deleggate.git
